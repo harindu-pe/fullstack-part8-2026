@@ -1,5 +1,6 @@
 const { ApolloServer } = require('@apollo/server')
 const { startStandaloneServer } = require('@apollo/server/standalone')
+const { v1: uuid } = require('uuid')
 
 let authors = [
   {
@@ -110,11 +111,23 @@ const typeDefs = /* GraphQL */ `
     name: String!
     id: ID!
     born: Int
+    bookCount: Int!
   }
 
   type Query {
     bookCount: Int!
     authorCount: Int!
+    allBooks(author: String, genre: String): [Book!]!
+    allAuthors: [Author!]!
+  }
+
+  type Mutation {
+    addBook(
+      title: String!
+      author: String!
+      published: Int!
+      genres: [String!]!
+    ): Book!
   }
 `
 
@@ -122,6 +135,44 @@ const resolvers = {
   Query: {
     bookCount: () => books.length,
     authorCount: () => authors.length,
+    allBooks: (root, args) => {
+      let result = books
+
+      if (args.author) {
+        result = result.filter((book) => book.author === args.author)
+      }
+
+      if (args.genre) {
+        result = result.filter((book) => book.genres.includes(args.genre))
+      }
+
+      return result
+    },
+    allAuthors: () => {
+      const bookCountCalculator = (author) =>
+        books.reduce(
+          (acc, book) => (book.author === author.name ? acc + 1 : acc),
+          0
+        )
+      return authors.map((author) => ({
+        ...author,
+        bookCount: bookCountCalculator(author),
+      }))
+    },
+  },
+  Mutation: {
+    addBook: (root, args) => {
+      const book = { ...args, id: uuid() }
+      books = books.concat(book)
+
+      const authorExists = authors.find((author) => author.name === args.author)
+
+      if (!authorExists) {
+        authors = authors.concat({ name: args.author, id: uuid() })
+      }
+
+      return { title: book.title, author: book.author }
+    },
   },
 }
 
