@@ -119,6 +119,7 @@ const resolvers = {
 
       return authors.map((author) => ({
         ...author.toObject(),
+        id: author._id.toString(),
         bookCount: bookCountCalculator(author),
       }))
     },
@@ -197,12 +198,7 @@ const resolvers = {
       let author = await Author.findOne({ name: args.name })
 
       if (!author) {
-        throw new GraphQLError(`Author not found: ${args.name}`, {
-          extensions: {
-            code: 'BAD_USER_INPUT',
-            invalidArgs: args.name,
-          },
-        })
+        return null
       }
 
       author.born = args.setBornTo
@@ -219,7 +215,7 @@ const resolvers = {
         })
       }
 
-      return { name: author.name, born: author.born }
+      return { ...author.toObject(), id: author._id.toString() }
     },
     createUser: async (root, args) => {
       let user = new User({
@@ -258,6 +254,15 @@ const resolvers = {
       }
 
       return { value: jwt.sign(userForToken, process.env.JWT_SECRET) }
+    },
+    _resetDatabase: async () => {
+      if (process.env.NODE_ENV !== 'test') {
+        throw new GraphQLError('_resetDatabase is only available in test mode')
+      }
+      await Author.deleteMany({})
+      await Book.deleteMany({})
+      await User.deleteMany({})
+      return true
     },
   },
   Book: {
