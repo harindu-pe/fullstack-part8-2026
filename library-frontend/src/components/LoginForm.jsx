@@ -9,7 +9,6 @@ const LoginForm = (props) => {
   const [login] = useMutation(LOGIN, {
     onCompleted: (data) => {
       const token = data.login.value;
-      console.log(token);
       props.setToken(token);
       localStorage.setItem("phonebook-user-token", token);
       props.setPage("authors");
