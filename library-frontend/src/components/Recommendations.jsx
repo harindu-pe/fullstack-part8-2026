@@ -2,21 +2,25 @@ import { useQuery } from "@apollo/client/react";
 import { ALL_BOOKS, USER } from "../queries";
 
 const Recommendations = (props) => {
-  const user = useQuery(USER);
+  const user = useQuery(USER, {
+    fetchPolicy: "network-only",
+    skip: !props.token,
+  });
 
   const favoriteGenre = user.data?.me?.favoriteGenre;
 
   const books = useQuery(ALL_BOOKS, {
     variables: { genre: favoriteGenre },
     skip: !favoriteGenre,
+    fetchPolicy: "network-only",
   });
-
-  if (user.loading || books.loading) {
-    return <div>loading...</div>;
-  }
 
   if (!props.show) {
     return null;
+  }
+
+  if (user.loading || books.loading) {
+    return <div>loading...</div>;
   }
 
   return (
@@ -25,7 +29,9 @@ const Recommendations = (props) => {
 
       <div>
         books in your favorite genre{" "}
-        <span style={{ fontWeight: "bold" }}>{user.data.me.favoriteGenre}</span>
+        <span style={{ fontWeight: "bold" }}>
+          {user.data?.me?.favoriteGenre}
+        </span>
       </div>
       <div>
         <table>

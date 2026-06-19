@@ -18,9 +18,10 @@ const EditAuthorForm = ({ authors }) => {
 
   return (
     <div style={{ marginTop: "20px" }}>
-      <h2>Set birth year</h2>
+      <h2>Set birthyear</h2>
       <form onSubmit={submit}>
         <select
+          name="name"
           value={author}
           onChange={({ target }) => setAuthor(target.value)}
         >
@@ -31,11 +32,13 @@ const EditAuthorForm = ({ authors }) => {
           ))}
         </select>
         <div>
-          born
-          <input
-            value={born}
-            onChange={({ target }) => setBorn(target.value)}
-          />
+          <label>
+            born
+            <input
+              value={born}
+              onChange={({ target }) => setBorn(target.value)}
+            />
+          </label>
         </div>
         <button type="submit">update author</button>
       </form>

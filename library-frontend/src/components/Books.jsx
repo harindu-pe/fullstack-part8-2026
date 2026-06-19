@@ -25,6 +25,11 @@ const Books = (props) => {
   return (
     <div>
       <h2>books</h2>
+      {selectedGenre && (
+        <div>
+          in genre <strong>{selectedGenre}</strong>
+        </div>
+      )}
 
       <table>
         <tbody>
